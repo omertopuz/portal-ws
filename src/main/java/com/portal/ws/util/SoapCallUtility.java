@@ -22,8 +22,11 @@ public class SoapCallUtility {
         SOAPPart soapPart = soapMessage.getSOAPPart();
         String contents = requestXmlString;
 
-        for (SoapParameterModel p:parameters) {
-            contents = contents.replace(p.getParameterName(),p.getParameterValue());
+        if (parameters!=null){
+            for (SoapParameterModel p:parameters) {
+                contents = contents.replace(p.getParameterName(),p.getParameterValue());
+            }
+
         }
 
         StreamSource ss =new StreamSource(new StringReader(contents));
@@ -34,6 +37,10 @@ public class SoapCallUtility {
 
         soapMessage.saveChanges();
         SOAPMessage soapResponse = soapConnection.call(soapMessage, soapEndpointUrl);
+
+        if (soapResponse.getSOAPBody().hasFault()){
+            throw new Exception(soapResponse.getSOAPBody().getFault().getFaultString());
+        }
 
         soapConnection.close();
 

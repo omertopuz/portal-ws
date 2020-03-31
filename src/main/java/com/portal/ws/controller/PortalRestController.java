@@ -8,20 +8,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/rest/portal")
 public class PortalRestController {
 
     @Autowired
     private WebServiceCallService service;
-
-    @GetMapping("reportfiledata")
-    public PdfFileResponse getReportFileData(@RequestBody PdfFileRequest request){
-        return service.getReportFileData(request);
-    }
-
     @GetMapping("informstate")
-    public InfromStateResponse informState(@RequestBody InformStateRequest request){
+    public InfromStateResponse informState(@Valid @RequestBody InformStateRequest request){
         return service.informState(request);
     }
 

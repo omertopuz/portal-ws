@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class WebServiceCallService {
@@ -23,6 +24,9 @@ public class WebServiceCallService {
     private static String informStateXmlString;
     private static String informFileMetaDataXmlFileString;
     private static String deleteFileMetaXmlFileString;
+    private static String tokenPortalWsAccessXmlFileString;
+
+    private final static String SUCCESS_MESSAGE ="SUCCESS";
 
     @Value( "${pdfreportws.credentials.username}" )
     private String pdfReportWsUserName;
@@ -40,6 +44,8 @@ public class WebServiceCallService {
     private String portalWsInformFileMetaDataSoapAction;
     @Value( "${portalws.actions.deletefilemetadata}" )
     private String portalWsDeleteFileMetaDataSoapAction;
+    @Value( "${portalws.actions.getToken}" )
+    private String portalWsgetTokenSoapAction;
 
     @PostConstruct
     private void readXmlFiles(){
@@ -47,10 +53,19 @@ public class WebServiceCallService {
         informStateXmlString = FileUtilities.readXmlFileString("informStateXmlFile.xml");
         informFileMetaDataXmlFileString = FileUtilities.readXmlFileString("informFileMetaDataXmlFile.xml");
         deleteFileMetaXmlFileString = FileUtilities.readXmlFileString("deleteFileMetaXmlFile.xml");
+        tokenPortalWsAccessXmlFileString = FileUtilities.readXmlFileString("tokenPortalWsAccessXmlFile.xml");
     }
 
     @Autowired
     private SoapCallUtility soapCall;
+
+    private static UUID ticketPortalWs;
+
+    public void getTicketPortalWs() throws Exception{
+        SOAPMessage soapResponse = soapCall.callSoapWebService(portalWsEndpointUrl,portalWsgetTokenSoapAction,tokenPortalWsAccessXmlFileString,null);
+        String responseString = soapResponse.getSOAPBody().getChildNodes().item(0).getTextContent();
+        ticketPortalWs= UUID.fromString(responseString);
+    };
 
     public PdfFileResponse getReportFileData(PdfFileRequest request){
         List<SoapParameterModel> parameterList = new ArrayList<>();
@@ -65,7 +80,8 @@ public class WebServiceCallService {
             String responseString = soapResponse.getSOAPBody().getChildNodes().item(0).getTextContent();
             byte[] utf8Bytes = Base64.getDecoder().decode(responseString);
             result.setBlobData(utf8Bytes);
-            FileUtilities.writeBytesToFileClassic(utf8Bytes,"File_" + request.getEntityId()+".pdf");
+            result.setMessage(SUCCESS_MESSAGE);
+//            FileUtilities.writeBytesToFileClassic(utf8Bytes,"File_" + request.getEntityId()+".pdf");
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());
         } catch (FileNotFoundException e) {
@@ -78,6 +94,7 @@ public class WebServiceCallService {
 
     public InfromStateResponse informState(InformStateRequest request){
         List<SoapParameterModel> parameterList = new ArrayList<>();
+        parameterList.add(new SoapParameterModel("tokenIdValue",ticketPortalWs.toString()));
         parameterList.add(new SoapParameterModel("idValue",request.getId()+""));
         parameterList.add(new SoapParameterModel("stateValue",request.getState()));
         parameterList.add(new SoapParameterModel("stateUpdateTimeValue",request.getStateUpdateTime()));
@@ -88,6 +105,7 @@ public class WebServiceCallService {
             Node responseNode = soapResponse.getSOAPBody().getChildNodes().item(0);
             result.setMessage(responseNode.getChildNodes().item(0).getChildNodes().item(0).getTextContent());
             result.setResult(responseNode.getChildNodes().item(0).getChildNodes().item(1).getTextContent());
+            result.setMessage(SUCCESS_MESSAGE);
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());
         } catch (FileNotFoundException e) {
@@ -100,6 +118,7 @@ public class WebServiceCallService {
 
     public InformFileResponse informFileMetaData(InformFileRequest request){
         List<SoapParameterModel> parameterList = new ArrayList<>();
+        parameterList.add(new SoapParameterModel("tokenIdValue",ticketPortalWs.toString()));
         parameterList.add(new SoapParameterModel("relatedEntityId",request.getRelatedEntityId()+""));
         parameterList.add(new SoapParameterModel("fileName",request.getFileName()));
         parameterList.add(new SoapParameterModel("fileMetaDataId",request.getFileMetaDataId().toString()));
@@ -110,6 +129,7 @@ public class WebServiceCallService {
             SOAPMessage soapResponse = soapCall.callSoapWebService(portalWsEndpointUrl,portalWsInformFileMetaDataSoapAction,informFileMetaDataXmlFileString,parameterList);
             Node responseNode = soapResponse.getSOAPBody().getChildNodes().item(0);
             result.setResult(Boolean.parseBoolean(responseNode.getTextContent()));
+            result.setMessage(SUCCESS_MESSAGE);
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());
         } catch (FileNotFoundException e) {
@@ -122,6 +142,7 @@ public class WebServiceCallService {
 
     public DeleteFileMetaResponse deleteFileMetaData(DeleteFileMetaRequest request){
         List<SoapParameterModel> parameterList = new ArrayList<>();
+        parameterList.add(new SoapParameterModel("tokenIdValue",ticketPortalWs.toString()));
         parameterList.add(new SoapParameterModel("fileId",request.getFileId()));
 
         DeleteFileMetaResponse result = new DeleteFileMetaResponse();
@@ -129,6 +150,7 @@ public class WebServiceCallService {
             SOAPMessage soapResponse = soapCall.callSoapWebService(portalWsEndpointUrl,portalWsDeleteFileMetaDataSoapAction,deleteFileMetaXmlFileString,parameterList);
             Node responseNode = soapResponse.getSOAPBody().getChildNodes().item(0);
             result.setResult(Boolean.parseBoolean(responseNode.getTextContent()));
+            result.setMessage(SUCCESS_MESSAGE);
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());
         } catch (FileNotFoundException e) {

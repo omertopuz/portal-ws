@@ -1,11 +1,19 @@
 package com.portal.ws.model;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.util.UUID;
 
 public class InformFileRequest {
+
+    @NotEmpty
     private UUID fileMetaDataId;
+    @NotEmpty
     private String fileName;
+    @Min(value = 0,message = "Entity Id must be greater than 0.")
     private int relatedEntityId;
+    @Pattern(regexp = "^[0-9]$",message = "File id must be numeric.")
     private String fileId;
 
     public InformFileRequest(UUID fileMetaDataId, String fileName, int relatedEntityId, String fileId) {

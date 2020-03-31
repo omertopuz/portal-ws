@@ -1,6 +1,9 @@
 package com.portal.ws.model;
 
+import javax.validation.constraints.Pattern;
+
 public class DeleteFileMetaRequest {
+    @Pattern(regexp = "^[0-9]$",message = "File id must be numeric.")
     private String fileId;
 
     public DeleteFileMetaRequest(String fileId) {
