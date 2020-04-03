@@ -81,7 +81,7 @@ public class WebServiceCallService {
             byte[] utf8Bytes = Base64.getDecoder().decode(responseString);
             result.setBlobData(utf8Bytes);
             result.setMessage(SUCCESS_MESSAGE);
-//            FileUtilities.writeBytesToFileClassic(utf8Bytes,"File_" + request.getEntityId()+".pdf");
+            FileUtilities.writeBytesToFileClassic(utf8Bytes,"File_" + request.getEntityId()+".pdf");
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());
         } catch (FileNotFoundException e) {
@@ -92,19 +92,19 @@ public class WebServiceCallService {
         return result;
     }
 
-    public InfromStateResponse informState(InformStateRequest request){
+    public InformStateResponse informState(InformStateRequest request){
         List<SoapParameterModel> parameterList = new ArrayList<>();
         parameterList.add(new SoapParameterModel("tokenIdValue",ticketPortalWs.toString()));
         parameterList.add(new SoapParameterModel("idValue",request.getId()+""));
         parameterList.add(new SoapParameterModel("stateValue",request.getState()));
         parameterList.add(new SoapParameterModel("stateUpdateTimeValue",request.getStateUpdateTime()));
 
-        InfromStateResponse result = new InfromStateResponse();
+        InformStateResponse result = new InformStateResponse(false,null);
         try {
             SOAPMessage soapResponse = soapCall.callSoapWebService(portalWsEndpointUrl,portalWsInformStateSoapAction,informStateXmlString,parameterList);
             Node responseNode = soapResponse.getSOAPBody().getChildNodes().item(0);
             result.setMessage(responseNode.getChildNodes().item(0).getChildNodes().item(0).getTextContent());
-            result.setResult(responseNode.getChildNodes().item(0).getChildNodes().item(1).getTextContent());
+            result.setResult(Boolean.parseBoolean(responseNode.getChildNodes().item(0).getChildNodes().item(1).getTextContent()));
             result.setMessage(SUCCESS_MESSAGE);
         } catch (SOAPException e) {
             result.setMessage(e.getMessage());

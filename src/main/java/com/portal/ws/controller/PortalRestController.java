@@ -3,10 +3,7 @@ package com.portal.ws.controller;
 import com.portal.ws.model.*;
 import com.portal.ws.service.WebServiceCallService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -16,17 +13,17 @@ public class PortalRestController {
 
     @Autowired
     private WebServiceCallService service;
-    @GetMapping("informstate")
-    public InfromStateResponse informState(@Valid @RequestBody InformStateRequest request){
+    @PostMapping("informstate")
+    public InformStateResponse informState(@Valid @RequestBody InformStateRequest request){
         return service.informState(request);
     }
 
-    @GetMapping("informfilemetadata")
+    @PostMapping("informfilemetadata")
     public InformFileResponse informFileMetaData(@RequestBody InformFileRequest request){
         return service.informFileMetaData(request);
     }
 
-    @GetMapping("deletefilemetadata")
+    @PostMapping("deletefilemetadata")
     public DeleteFileMetaResponse deleteFileMetaData(@RequestBody DeleteFileMetaRequest request){
         return service.deleteFileMetaData(request);
     }

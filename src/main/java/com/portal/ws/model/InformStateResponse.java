@@ -1,22 +1,19 @@
 package com.portal.ws.model;
 
-public class InfromStateResponse {
-    private String result;
+public class InformStateResponse {
+    private boolean result;
     private String message;
 
-    public InfromStateResponse(String result, String message) {
+    public InformStateResponse(boolean result, String message) {
         this.result = result;
         this.message = message;
     }
 
-    public InfromStateResponse() {
-    }
-
-    public String getResult() {
+    public boolean isResult() {
         return result;
     }
 
-    public void setResult(String result) {
+    public void setResult(boolean result) {
         this.result = result;
     }
 
